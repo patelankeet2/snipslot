@@ -1,0 +1,26 @@
+# dependencies
+node_modules/
+
+# builds
+dist/
+dev-dist/
+coverage/
+
+# env files (only the example files are committed)
+.env
+.env.*
+!.env.example
+
+# logs
+logs/
+*.log
+npm-debug.log*
+
+# editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
+
+# local backups
+backups/
