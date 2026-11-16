@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PageHeader } from '../components/PageHeader';
+import { Icon } from '../components/Icon';
 import { useAuth } from '../hooks/useAuth';
 
 export default function ProfilePage() {
@@ -18,7 +19,7 @@ export default function ProfilePage() {
 
   return (
     <section className="page narrow">
-      <PageHeader title="Profile" />
+      <PageHeader title="Profile" subtitle="Your account and app settings." />
 
       <div className="card profile-card">
         {user.picture ? (
@@ -31,7 +32,7 @@ export default function ProfilePage() {
         ) : (
           <span className="avatar avatar-lg avatar-fallback">{user.name.charAt(0)}</span>
         )}
-        <div>
+        <div className="profile-details">
           <h2>{user.name}</h2>
           <p className="muted">{user.email}</p>
           <span className={`badge ${user.role === 'owner' ? 'badge-owner' : 'badge-customer'}`}>
@@ -40,7 +41,13 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      <button className="btn btn-ghost btn-block" onClick={handleSignOut} disabled={signingOut}>
+      <button
+        type="button"
+        className="btn btn-ghost btn-block"
+        onClick={handleSignOut}
+        disabled={signingOut}
+      >
+        <Icon name="logout" size={18} />
         {signingOut ? 'Signing out...' : 'Sign out'}
       </button>
     </section>
