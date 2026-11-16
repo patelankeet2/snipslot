@@ -1,6 +1,7 @@
 import { Link, Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { Spinner } from './Spinner';
+import { EmptyState } from './EmptyState';
 import type { Role } from '../types';
 
 interface Props {
@@ -22,12 +23,17 @@ export function ProtectedRoute({ roles }: Props) {
 
   if (roles && !roles.includes(user.role)) {
     return (
-      <section className="page narrow center">
-        <h1>No access</h1>
-        <p className="muted">This page is only for the {roles.join(' or ')}.</p>
-        <Link className="btn btn-primary" to="/">
-          Back to home
-        </Link>
+      <section className="page narrow">
+        <EmptyState
+          icon="lock"
+          title="No access"
+          text={`This page is only available to the ${roles.join(' or ')}.`}
+          action={
+            <Link className="btn btn-primary" to="/">
+              Back to home
+            </Link>
+          }
+        />
       </section>
     );
   }

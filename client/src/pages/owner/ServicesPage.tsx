@@ -1,4 +1,5 @@
 import { PageHeader } from '../../components/PageHeader';
+import { EmptyState } from '../../components/EmptyState';
 
 export default function ServicesPage() {
   return (
@@ -7,7 +8,7 @@ export default function ServicesPage() {
         title="Services"
         subtitle="What customers can book, how long it takes and the price."
       />
-      <div className="empty-state">Service management is on its way.</div>
+      <EmptyState icon="scissors" title="Services" text="Service management is coming next." />
     </section>
   );
 }
