@@ -36,6 +36,12 @@ npm run dev
 
 The API runs on http://localhost:4000. Check http://localhost:4000/api/health
 
+To load the starter services, barbers and opening hours (only fills empty collections):
+
+```bash
+npm run seed
+```
+
 ### Client
 
 ```bash
