@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { GoogleSignInButton } from '../components/GoogleSignInButton';
+import { BarberBackdrop } from '../components/BarberBackdrop';
 import { Icon, type IconName } from '../components/Icon';
 import { useAuth } from '../hooks/useAuth';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
@@ -40,6 +41,7 @@ export default function LoginPage() {
 
   return (
     <main className="login">
+      <BarberBackdrop />
       <section className="login-card" aria-labelledby="login-title">
         <img src="/logo.svg" alt="" width={68} height={68} className="login-logo" />
         <h1 id="login-title">SnipSlot</h1>
