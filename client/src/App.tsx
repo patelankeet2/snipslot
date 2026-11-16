@@ -1,24 +1,46 @@
-import { useEffect, useState } from 'react';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import { ProtectedRoute } from './components/ProtectedRoute';
+import { Layout } from './components/Layout';
+import LoginPage from './pages/LoginPage';
+import HomeRedirect from './pages/HomeRedirect';
+import ProfilePage from './pages/ProfilePage';
+import NotFoundPage from './pages/NotFoundPage';
+import BookPage from './pages/customer/BookPage';
+import MyBookingsPage from './pages/customer/MyBookingsPage';
+import SchedulePage from './pages/owner/SchedulePage';
+import ServicesPage from './pages/owner/ServicesPage';
+import BarbersPage from './pages/owner/BarbersPage';
 
-type ApiStatus = 'checking' | 'online' | 'offline';
-
-// Temporary landing page for the setup stage.
-// It pings the API so we can confirm the dev proxy is wired up.
 export default function App() {
-  const [status, setStatus] = useState<ApiStatus>('checking');
-
-  useEffect(() => {
-    fetch('/api/health')
-      .then((res) => setStatus(res.ok ? 'online' : 'offline'))
-      .catch(() => setStatus('offline'));
-  }, []);
-
   return (
-    <main className="setup">
-      <img src="/logo.svg" alt="" width={72} height={72} />
-      <h1>SnipSlot</h1>
-      <p>Barber and salon booking, right from your phone.</p>
-      <p className={`pill pill-${status}`}>API: {status}</p>
-    </main>
+    <BrowserRouter>
+      <AuthProvider>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+
+          {/* everything below needs a signed in user */}
+          <Route element={<ProtectedRoute />}>
+            <Route element={<Layout />}>
+              <Route index element={<HomeRedirect />} />
+              <Route path="profile" element={<ProfilePage />} />
+
+              <Route element={<ProtectedRoute roles={['customer']} />}>
+                <Route path="book" element={<BookPage />} />
+                <Route path="bookings" element={<MyBookingsPage />} />
+              </Route>
+
+              <Route path="owner" element={<ProtectedRoute roles={['owner']} />}>
+                <Route path="today" element={<SchedulePage />} />
+                <Route path="services" element={<ServicesPage />} />
+                <Route path="barbers" element={<BarbersPage />} />
+              </Route>
+            </Route>
+          </Route>
+
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
