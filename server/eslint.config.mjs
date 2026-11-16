@@ -12,7 +12,7 @@ export default tseslint.config(
     },
     rules: {
       // unused args prefixed with _ are intentional (eg express error handler)
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
       'no-console': 'off',
     },
   },
