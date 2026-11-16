@@ -160,6 +160,31 @@ svg {
   border-bottom: 1px solid var(--line);
 }
 
+/* thin barber pole stripe along the bottom of the header */
+.topbar::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 3px;
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--pole-red) 0 8px,
+    #fff 8px 16px,
+    var(--navy) 16px 24px,
+    #fff 24px 32px
+  );
+  opacity: 0.85;
+  animation: stripe-slide 2.5s linear infinite;
+}
+
+@keyframes stripe-slide {
+  to {
+    background-position: 45.25px 0;
+  }
+}
+
 .brand {
   display: flex;
   align-items: center;
@@ -508,6 +533,8 @@ svg {
    Login
    ========================================================== */
 .login {
+  position: relative;
+  overflow: hidden;
   min-height: 100vh;
   display: grid;
   place-items: center;
@@ -518,6 +545,8 @@ svg {
 }
 
 .login-card {
+  position: relative;
+  z-index: 1; /* sit above the animated backdrop */
   width: 100%;
   max-width: 420px;
   display: grid;
@@ -635,5 +664,188 @@ svg {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* ==========================================================
+   Login backdrop: barber poles, moving stripes, drifting tools
+   Only transform and opacity are animated so it stays smooth on phones.
+   ========================================================== */
+.backdrop {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* faint diagonal pole stripes, faded out towards the middle so the card stays clean */
+.backdrop-stripes {
+  position: absolute;
+  inset: -160px;
+  background: repeating-linear-gradient(
+    135deg,
+    rgb(230 57 70 / 0.07) 0 26px,
+    transparent 26px 52px,
+    rgb(29 53 87 / 0.06) 52px 78px,
+    transparent 78px 104px
+  );
+  /* one full stripe cycle sideways is 104px / cos(45deg) = 147px, so the loop is seamless */
+  animation: stripes-drift 24s linear infinite;
+  -webkit-mask-image: radial-gradient(closest-side, transparent 35%, #000 100%);
+  mask-image: radial-gradient(closest-side, transparent 35%, #000 100%);
+}
+
+@keyframes stripes-drift {
+  to {
+    transform: translateX(147px);
+  }
+}
+
+.float-tool {
+  position: absolute;
+  width: var(--size, 56px);
+  height: var(--size, 56px);
+  color: var(--navy);
+  opacity: 0.13;
+  animation: tool-float var(--dur, 14s) ease-in-out var(--delay, 0s) infinite alternate;
+}
+
+.float-tool svg {
+  width: 100%;
+  height: 100%;
+}
+
+.tool-1 {
+  top: 8%;
+  left: 10%;
+  --size: 70px;
+  --dur: 13s;
+  --rot: -20deg;
+}
+.tool-2 {
+  top: 18%;
+  right: 14%;
+  --size: 60px;
+  --dur: 16s;
+  --delay: -4s;
+  --rot: 25deg;
+}
+.tool-3 {
+  bottom: 14%;
+  left: 16%;
+  --size: 64px;
+  --dur: 15s;
+  --delay: -7s;
+  --rot: 15deg;
+}
+.tool-4 {
+  bottom: 9%;
+  right: 10%;
+  --size: 52px;
+  --dur: 12s;
+  --delay: -2s;
+  --rot: 40deg;
+  color: var(--pole-red);
+}
+.tool-5 {
+  top: 48%;
+  left: 4%;
+  --size: 44px;
+  --dur: 17s;
+  --delay: -9s;
+  --rot: -35deg;
+}
+.tool-6 {
+  top: 52%;
+  right: 5%;
+  --size: 48px;
+  --dur: 14s;
+  --delay: -5s;
+  --rot: -10deg;
+  color: var(--pole-red);
+}
+
+@keyframes tool-float {
+  from {
+    transform: translate(0, 0) rotate(var(--rot, 0deg));
+  }
+  to {
+    transform: translate(18px, -26px) rotate(calc(var(--rot, 0deg) + 14deg));
+  }
+}
+
+/* classic spinning barber pole, only on wider screens where there is room */
+.pole {
+  position: absolute;
+  top: 50%;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  transform: translateY(-50%);
+  filter: drop-shadow(0 10px 18px rgb(15 23 42 / 0.15));
+}
+
+.pole-left {
+  left: max(4vw, 24px);
+}
+
+.pole-right {
+  right: max(4vw, 24px);
+}
+
+.pole-cap {
+  width: 46px;
+  height: 18px;
+  border-radius: 10px;
+  background: linear-gradient(180deg, var(--navy-600), var(--navy-700));
+}
+
+.pole-tube {
+  position: relative;
+  width: 34px;
+  height: 240px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #fff;
+  box-shadow:
+    inset 6px 0 10px rgb(255 255 255 / 0.9),
+    inset -8px 0 12px rgb(15 23 42 / 0.18);
+}
+
+/* the stripes are twice as tall as the tube and slide up by exactly one repeat */
+.pole-stripes {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: calc(240px + 68px);
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--pole-red) 0 12px,
+    #fff 12px 24px,
+    var(--navy) 24px 36px,
+    #fff 36px 48px
+  );
+  /* vertical period of 48px stripes at 45deg is 48 / sin(45deg) = 68px */
+  animation: pole-spin 1.6s linear infinite;
+}
+
+/* glass highlight over the stripes */
+.pole-tube::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgb(255 255 255 / 0.45), transparent 40%, rgb(0 0 0 / 0.12));
+}
+
+@keyframes pole-spin {
+  to {
+    transform: translateY(-68px);
+  }
+}
+
+@media (min-width: 900px) {
+  .pole {
+    display: flex;
   }
 }
