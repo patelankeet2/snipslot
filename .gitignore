@@ -24,3 +24,9 @@ Thumbs.db
 
 # local backups
 backups/
+
+# files the Postman desktop app writes when a folder is opened as a local workspace
+# (its environment files can hold real tokens)
+postman/.postman/
+postman/postman/
+postman/*.yaml
