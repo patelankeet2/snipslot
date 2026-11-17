@@ -5,6 +5,7 @@ import serviceRoutes from './service.routes';
 import barberRoutes from './barber.routes';
 import settingsRoutes from './settings.routes';
 import bookingRoutes from './booking.routes';
+import slotRoutes from './slot.routes';
 import { apiLimiter } from '../middleware/rateLimit';
 
 // All API routes are mounted here under /api
@@ -17,6 +18,7 @@ router.use('/auth', authRoutes);
 router.use('/services', serviceRoutes);
 router.use('/barbers', barberRoutes);
 router.use('/settings', settingsRoutes);
+router.use('/slots', slotRoutes);
 router.use('/bookings', bookingRoutes);
 
 export default router;
