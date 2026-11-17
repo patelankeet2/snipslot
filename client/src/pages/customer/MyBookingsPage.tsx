@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { PageHeader } from '../../components/PageHeader';
 import { EmptyState } from '../../components/EmptyState';
@@ -12,6 +12,8 @@ import { barbersApi, settingsApi } from '../../api/catalog';
 import { errorMessage } from '../../api/client';
 import { useLoader } from '../../hooks/useLoader';
 import { useToast } from '../../hooks/useToast';
+import { useOutbox } from '../../hooks/useOutbox';
+import { DATA_SYNCED } from '../../components/SyncManager';
 import {
   dateParts,
   formatDuration,
@@ -40,25 +42,45 @@ export default function MyBookingsPage() {
   const [moving, setMoving] = useState<MyBooking | null>(null);
   const [cancelling, setCancelling] = useState<MyBooking | null>(null);
 
+  // changes made offline that have not reached the server yet, by booking id
+  const outbox = useOutbox();
+  const pendingFor = new Map(outbox.map((item) => [item.bookingId, item]));
+
+  // once queued changes have synced, fetch the real state from the server
+  const { reload } = bookings;
+  useEffect(() => {
+    window.addEventListener(DATA_SYNCED, reload);
+    return () => window.removeEventListener(DATA_SYNCED, reload);
+  }, [reload]);
+
   const reschedule = async (start: string) => {
     if (!moving) return;
-    const updated = await bookingsApi.reschedule(moving.id, start);
-    bookings.setData(
-      (list) =>
-        list
-          ?.map((b) => (b.id === updated.id ? updated : b))
-          .sort((a, b) => a.start.localeCompare(b.start)) ?? null,
-    );
-    notify(`Moved to ${formatShortDate(updated.start)} at ${formatTime(updated.start)}`);
+    const result = await bookingsApi.reschedule(moving, start);
+    if (result.queued) {
+      notify('You are offline. The new time will be saved when you reconnect.', 'info');
+    } else {
+      const updated = result.booking;
+      bookings.setData(
+        (list) =>
+          list
+            ?.map((b) => (b.id === updated.id ? updated : b))
+            .sort((a, b) => a.start.localeCompare(b.start)) ?? null,
+      );
+      notify(`Moved to ${formatShortDate(updated.start)} at ${formatTime(updated.start)}`);
+    }
     setMoving(null);
   };
 
   const cancel = async () => {
     if (!cancelling) return;
     try {
-      await bookingsApi.cancel(cancelling.id);
-      bookings.setData((list) => list?.filter((b) => b.id !== cancelling.id) ?? null);
-      notify('Booking cancelled');
+      const result = await bookingsApi.cancel(cancelling);
+      if (result.queued) {
+        notify('You are offline. The cancellation will be sent when you reconnect.', 'info');
+      } else {
+        bookings.setData((list) => list?.filter((b) => b.id !== cancelling.id) ?? null);
+        notify('Booking cancelled');
+      }
     } catch (err) {
       notify(errorMessage(err), 'error');
     }
@@ -118,7 +140,10 @@ export default function MyBookingsPage() {
       {bookings.data && bookings.data.length > 0 && (
         <ul className="booking-list">
           {bookings.data.map((b) => (
-            <li key={b.id} className={`card my-booking status-${b.status}`}>
+            <li
+              key={b.id}
+              className={`card my-booking status-${b.status}${pendingFor.has(b.id) ? ' is-pending' : ''}`}
+            >
               <div className="date-badge" aria-hidden="true">
                 <span>{dateParts(b.start).weekday}</span>
                 <strong>{dateParts(b.start).day}</strong>
@@ -138,9 +163,15 @@ export default function MyBookingsPage() {
                   {formatPrice(b.priceAtBooking)}
                 </p>
                 {b.notes && <p className="booking-notes">“{b.notes}”</p>}
+                {pendingFor.has(b.id) && (
+                  <p className="pending-note">
+                    <Icon name="clock" size={14} /> Waiting to sync:{' '}
+                    {pendingFor.get(b.id)!.kind === 'cancel' ? 'cancellation' : 'new time'}
+                  </p>
+                )}
               </div>
 
-              {tab === 'upcoming' && b.status === 'booked' && (
+              {tab === 'upcoming' && b.status === 'booked' && !pendingFor.has(b.id) && (
                 <div className="item-actions">
                   <button
                     type="button"
