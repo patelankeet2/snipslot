@@ -56,3 +56,6 @@ export interface Booking {
   priceAtBooking: number;
   notes?: string;
 }
+
+// a customer's own booking: the customer field is left out because it is always them
+export type MyBooking = Omit<Booking, 'customer'>;
