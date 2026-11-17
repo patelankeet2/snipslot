@@ -1892,3 +1892,92 @@ svg {
 .my-booking.status-no_show .date-badge {
   background: var(--muted);
 }
+
+/* ==========================================================
+   Offline and install
+   ========================================================== */
+.offline-banner {
+  position: sticky;
+  top: 64px; /* just under the header */
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--warn-50);
+  color: var(--warn);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: center;
+  border-bottom: 1px solid #f6d9a8;
+  animation: banner-in 220ms var(--ease);
+}
+
+.offline-banner.is-syncing {
+  background: var(--navy-50);
+  color: var(--navy);
+  border-bottom-color: #cdd8e6;
+}
+
+@keyframes banner-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+.pending-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  justify-self: start;
+  margin-top: 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--warn-50);
+  color: var(--warn);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.my-booking.is-pending {
+  border-style: dashed;
+  border-color: #e9c98c;
+}
+
+.install-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.install-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.install-text .muted,
+.install-card .muted {
+  margin-top: 2px;
+  font-size: 0.9rem;
+}
+
+.install-app-icon {
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+}
+
+.install-icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: 50%;
+}
+
+.install-icon.is-done {
+  background: var(--success-50);
+  color: var(--success);
+}
