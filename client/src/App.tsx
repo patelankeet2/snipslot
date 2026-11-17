@@ -1,5 +1,6 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { ToastProvider } from './context/ToastContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Layout } from './components/Layout';
 import LoginPage from './pages/LoginPage';
@@ -16,30 +17,32 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
+        <ToastProvider>
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
 
-          {/* everything below needs a signed in user */}
-          <Route element={<ProtectedRoute />}>
-            <Route element={<Layout />}>
-              <Route index element={<HomeRedirect />} />
-              <Route path="profile" element={<ProfilePage />} />
+            {/* everything below needs a signed in user */}
+            <Route element={<ProtectedRoute />}>
+              <Route element={<Layout />}>
+                <Route index element={<HomeRedirect />} />
+                <Route path="profile" element={<ProfilePage />} />
 
-              <Route element={<ProtectedRoute roles={['customer']} />}>
-                <Route path="book" element={<BookPage />} />
-                <Route path="bookings" element={<MyBookingsPage />} />
-              </Route>
+                <Route element={<ProtectedRoute roles={['customer']} />}>
+                  <Route path="book" element={<BookPage />} />
+                  <Route path="bookings" element={<MyBookingsPage />} />
+                </Route>
 
-              <Route path="owner" element={<ProtectedRoute roles={['owner']} />}>
-                <Route path="today" element={<SchedulePage />} />
-                <Route path="services" element={<ServicesPage />} />
-                <Route path="barbers" element={<BarbersPage />} />
+                <Route path="owner" element={<ProtectedRoute roles={['owner']} />}>
+                  <Route path="today" element={<SchedulePage />} />
+                  <Route path="services" element={<ServicesPage />} />
+                  <Route path="barbers" element={<BarbersPage />} />
+                </Route>
               </Route>
             </Route>
-          </Route>
 
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+        </ToastProvider>
       </AuthProvider>
     </BrowserRouter>
   );
