@@ -9,6 +9,7 @@ interface GoogleIdConfig {
   callback: (response: GoogleCredentialResponse) => void;
   ux_mode?: 'popup' | 'redirect';
   auto_select?: boolean;
+  use_fedcm_for_button?: boolean;
   cancel_on_tap_outside?: boolean;
 }
 

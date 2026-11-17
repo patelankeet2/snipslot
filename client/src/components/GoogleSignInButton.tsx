@@ -47,6 +47,8 @@ export function GoogleSignInButton({ onCredential }: Props) {
           callback: (response) => callbackRef.current(response.credential),
           ux_mode: 'popup',
           auto_select: false,
+          // browser native sign in (FedCM) where supported, avoids popup messaging issues
+          use_fedcm_for_button: true,
         });
         window.google.accounts.id.renderButton(containerRef.current, {
           theme: 'filled_blue',

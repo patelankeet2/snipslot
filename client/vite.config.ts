@@ -48,6 +48,8 @@ export default defineConfig({
   ],
   server: {
     port: 5173,
+    // lets the Google sign in popup report back to this page
+    headers: { 'Cross-Origin-Opener-Policy': 'same-origin-allow-popups' },
     // forward API calls to Express so the browser sees one origin (cookies just work)
     proxy: {
       '/api': {
@@ -55,5 +57,8 @@ export default defineConfig({
         changeOrigin: true,
       },
     },
+  },
+  preview: {
+    headers: { 'Cross-Origin-Opener-Policy': 'same-origin-allow-popups' },
   },
 });
