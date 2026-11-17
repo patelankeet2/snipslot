@@ -27,4 +27,9 @@ export const authService = new AuthService(
 export const catalogService = new CatalogService(serviceRepository, bookingRepository);
 export const barberService = new BarberService(barberRepository, bookingRepository);
 export const settingsService = new SettingsService(settingsRepository);
-export const bookingService = new BookingService(bookingRepository, settingsRepository);
+export const bookingService = new BookingService(
+  bookingRepository,
+  settingsRepository,
+  serviceRepository,
+  barberRepository,
+);
