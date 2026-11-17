@@ -19,6 +19,16 @@ export class BookingRepository extends BaseRepository<IBooking> {
     });
   }
 
+  // every booking that starts inside the window, with names filled in for display
+  findForDay(from: Date, to: Date) {
+    return this.model
+      .find({ start: { $gte: from, $lt: to } })
+      .sort({ start: 1 })
+      .populate('customer', 'name email picture')
+      .populate('barber', 'name')
+      .populate('service', 'name durationMin');
+  }
+
   // active bookings for a barber inside a window, used to work out free slots
   findBookedBetween(barberId: string, from: Date, to: Date) {
     return this.model
