@@ -1,6 +1,7 @@
 import { Link, NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { Icon, type IconName } from './Icon';
+import { OfflineBanner } from './OfflineBanner';
 import type { Role } from '../types';
 
 interface NavItem {
@@ -59,6 +60,8 @@ export function Layout() {
           )}
         </Link>
       </header>
+
+      <OfflineBanner />
 
       <main className="content" id="main">
         <Outlet />
