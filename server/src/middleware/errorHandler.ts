@@ -8,6 +8,12 @@ export const notFoundHandler: RequestHandler = (req, _res, next) => {
   next(AppError.notFound(`Route ${req.method} ${req.originalUrl} not found`));
 };
 
+const DB_UNREACHABLE = [
+  'MongoServerSelectionError',
+  'MongoNetworkError',
+  'MongoNetworkTimeoutError',
+];
+
 // Turn the different kinds of errors we can hit into one consistent shape
 function toAppError(err: unknown): AppError {
   if (err instanceof AppError) return err;
@@ -40,6 +46,16 @@ function toAppError(err: unknown): AppError {
     return AppError.badRequest('Request body is not valid JSON');
   }
 
+  // Atlas could not be reached (network down, or this IP is not on the Atlas access list).
+  // That is a temporary outage, not a bug in the request, so answer 503 rather than 500.
+  if (err instanceof Error && DB_UNREACHABLE.includes(err.name)) {
+    return new AppError(
+      503,
+      'The database is not reachable right now, please try again shortly',
+      'DATABASE_UNAVAILABLE',
+    );
+  }
+
   return new AppError(500, 'Something went wrong on our side', 'INTERNAL_ERROR');
 }
 
@@ -47,7 +63,13 @@ export const errorHandler: ErrorRequestHandler = (err, req, res, _next) => {
   const appError = toAppError(err);
   const context = { method: req.method, path: req.originalUrl, status: appError.statusCode };
 
-  if (appError.statusCode >= 500) {
+  if (appError.code === 'DATABASE_UNAVAILABLE') {
+    // short, actionable log line instead of a long driver stack trace
+    logger.error('Cannot reach MongoDB. Check the network and the Atlas IP access list.', {
+      ...context,
+      reason: err instanceof Error ? err.message.slice(0, 200) : String(err),
+    });
+  } else if (appError.statusCode >= 500) {
     // keep the real stack in the logs, never send it to the client
     logger.error(err instanceof Error ? err.message : String(err), {
       ...context,
