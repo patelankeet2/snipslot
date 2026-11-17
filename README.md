@@ -86,3 +86,21 @@ All routes are under `/api`. Signed in requests use the `snipslot_session` httpO
 ## Postman
 
 Import both files from the `postman` folder. Sign in on the web app, copy the `snipslot_session` cookie value from DevTools (Application > Cookies) and paste it into `ownerToken` or `customerToken` in the environment. The collection has tests on every request, so it can be run with the Collection Runner.
+
+## Offline mode
+
+- The app shell (HTML, JS, CSS, icons) is precached by the service worker, so the app opens with no connection.
+- API reads use a network first strategy with a cached fallback (`api-data` cache). Profile photos and fonts are cache first.
+- Upcoming bookings are also saved in IndexedDB (`snipslot` database, `bookings` store).
+- Cancelling or rescheduling while offline puts the change in an IndexedDB outbox. It is replayed by Background Sync in Chrome and Edge, or when the browser comes back online in Safari and Firefox.
+- Signing out clears the cached API data, photos and IndexedDB.
+
+To try it, use the production build, because the dev server does not cache the app's JavaScript:
+
+```bash
+cd client
+npm run build
+npm run preview   # http://localhost:4173, /api is proxied to the server
+```
+
+Then in Chrome DevTools > Network choose "Offline" and reload.
