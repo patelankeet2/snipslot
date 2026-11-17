@@ -62,3 +62,27 @@ The app runs on http://localhost:5173 and forwards `/api` calls to the API.
 | `npm run lint` | ESLint |
 | `npm run typecheck` | TypeScript check without emitting |
 | `npm test` | Run the tests |
+
+## API overview
+
+All routes are under `/api`. Signed in requests use the `snipslot_session` httpOnly cookie, or the same token as `Authorization: Bearer <token>` (handy for Postman).
+
+| Method | Route | Who |
+| --- | --- | --- |
+| GET | `/health` | anyone |
+| POST | `/auth/google` | anyone (Google ID token in, session cookie out) |
+| GET | `/auth/session` | anyone (returns `user: null` when signed out) |
+| GET | `/auth/me` | signed in |
+| POST | `/auth/logout` | anyone |
+| GET | `/services`, `/services/:id` | signed in |
+| POST, PUT, DELETE | `/services`, `/services/:id` | owner |
+| GET | `/barbers`, `/barbers/:id` | signed in |
+| POST, PUT, DELETE | `/barbers`, `/barbers/:id` | owner |
+| GET | `/settings` | signed in |
+| PUT | `/settings/hours` | owner |
+| GET | `/bookings/schedule?date=YYYY-MM-DD` | owner |
+| PATCH | `/bookings/:id/status` | owner |
+
+## Postman
+
+Import both files from the `postman` folder. Sign in on the web app, copy the `snipslot_session` cookie value from DevTools (Application > Cookies) and paste it into `ownerToken` or `customerToken` in the environment. The collection has tests on every request, so it can be run with the Collection Runner.
