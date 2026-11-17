@@ -812,3 +812,651 @@ svg {
     display: flex;
   }
 }
+
+/* ==========================================================
+   Extra buttons
+   ========================================================== */
+.btn-sm {
+  min-height: 38px;
+  padding: 0 14px;
+  font-size: 0.875rem;
+}
+
+.btn-success {
+  background: var(--success);
+  color: #fff;
+}
+
+.btn-success:hover:not(:disabled) {
+  background: #065f46;
+}
+
+.btn-danger-solid {
+  background: var(--danger);
+  color: #fff;
+}
+
+.btn-danger-solid:hover:not(:disabled) {
+  background: #b91c1c;
+}
+
+.icon-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background var(--speed) var(--ease);
+}
+
+.icon-btn:hover {
+  background: var(--surface-sunk);
+}
+
+/* ==========================================================
+   Forms
+   ========================================================== */
+.form {
+  display: grid;
+  gap: 16px;
+}
+
+.form-row {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 1fr 1fr;
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.field label,
+.field legend {
+  padding: 0;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.field legend {
+  margin-bottom: 6px;
+}
+
+.field input,
+.field textarea,
+.field select,
+.hours-times input,
+.day-nav input {
+  width: 100%;
+  min-height: 46px;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  transition:
+    border-color var(--speed) var(--ease),
+    box-shadow var(--speed) var(--ease);
+}
+
+.field textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.field input:focus,
+.field textarea:focus,
+.hours-times input:focus,
+.day-nav input:focus {
+  outline: none;
+  border-color: var(--navy);
+  box-shadow: 0 0 0 3px rgb(29 53 87 / 0.15);
+}
+
+.field-error input,
+.field-error textarea {
+  border-color: var(--danger);
+}
+
+.field-message {
+  color: var(--danger);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.field-hint {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+/* working day chips in the barber form */
+.day-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.day-chip {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  min-width: 52px;
+  min-height: 44px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition:
+    background var(--speed) var(--ease),
+    color var(--speed) var(--ease);
+}
+
+.day-chip input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.day-chip.is-on {
+  background: var(--navy);
+  border-color: var(--navy);
+  color: #fff;
+}
+
+.day-chip:has(input:focus-visible) {
+  outline: 3px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* ==========================================================
+   Modal (native dialog)
+   ========================================================== */
+.modal {
+  width: min(520px, calc(100vw - 24px));
+  max-height: calc(100vh - 48px);
+  padding: 0;
+  border: 0;
+  border-radius: 20px;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow-lg);
+}
+
+.modal::backdrop {
+  background: rgb(15 23 42 / 0.45);
+  backdrop-filter: blur(2px);
+}
+
+.modal[open] {
+  animation: modal-in 220ms var(--ease);
+}
+
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+}
+
+.modal-body {
+  display: grid;
+  gap: 16px;
+  padding: 20px;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: -6px -8px 0 0;
+}
+
+/* on phones the modal sits at the bottom like a sheet */
+@media (max-width: 600px) {
+  .modal {
+    margin: auto 0 0;
+    width: 100%;
+    max-width: 100%;
+    border-radius: 20px 20px 0 0;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================================
+   Lists of cards (services, barbers)
+   ========================================================== */
+.card-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+.item-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 16px;
+  transition: box-shadow var(--speed) var(--ease);
+}
+
+.item-card:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+.item-card.is-archived {
+  background: var(--surface-sunk);
+  box-shadow: none;
+}
+
+.item-main {
+  display: grid;
+  gap: 6px;
+}
+
+.barber-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.item-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.item-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--surface-sunk);
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.price {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--navy);
+}
+
+.item-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.badge-muted {
+  background: var(--line);
+  color: var(--muted);
+}
+
+.avatar-md {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  font-size: 1.2rem;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.card-header .muted {
+  margin-top: 4px;
+}
+
+/* ==========================================================
+   Opening hours editor
+   ========================================================== */
+.hours-list {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+}
+
+.hours-row {
+  display: grid;
+  grid-template-columns: 110px auto 1fr;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.hours-row:last-child {
+  border-bottom: 0;
+}
+
+.hours-day {
+  font-weight: 600;
+}
+
+.hours-times {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+}
+
+.hours-times input {
+  max-width: 150px;
+  min-height: 42px;
+  padding: 6px 10px;
+}
+
+.hours-row.is-closed .hours-times {
+  opacity: 0.4;
+}
+
+.hours-error {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 600px) {
+  .hours-row {
+    grid-template-columns: 1fr auto;
+  }
+  .hours-times {
+    grid-column: 1 / -1;
+  }
+}
+
+/* on/off switch built from a checkbox */
+.switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  cursor: pointer;
+}
+
+.switch input {
+  position: absolute;
+  opacity: 0;
+}
+
+.switch-track {
+  position: relative;
+  width: 42px;
+  height: 24px;
+  border-radius: 999px;
+  background: var(--line);
+  transition: background var(--speed) var(--ease);
+}
+
+.switch-track::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--speed) var(--ease);
+}
+
+.switch input:checked + .switch-track {
+  background: var(--success);
+}
+
+.switch input:checked + .switch-track::after {
+  transform: translateX(18px);
+}
+
+.switch input:focus-visible + .switch-track {
+  outline: 3px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.switch-label {
+  min-width: 52px;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+/* ==========================================================
+   Schedule
+   ========================================================== */
+.day-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+}
+
+.day-nav-centre {
+  flex: 1;
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  text-align: center;
+}
+
+.day-nav input {
+  width: auto;
+  min-height: 38px;
+  padding: 4px 10px;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.stat {
+  display: grid;
+  gap: 2px;
+  padding: 14px;
+  text-align: center;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.stat-value {
+  /* Inter digits, the display font makes 0 look like the letter O */
+  font-size: 1.7rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: var(--navy);
+  line-height: 1.1;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.booking-row {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 14px;
+  align-items: start;
+  border-left: 4px solid var(--navy);
+}
+
+.booking-row .item-actions {
+  grid-column: 2;
+}
+
+@media (min-width: 768px) {
+  .booking-row {
+    grid-template-columns: 80px 1fr auto;
+    align-items: center;
+  }
+  .booking-row .item-actions {
+    grid-column: auto;
+  }
+}
+
+.booking-row.status-completed {
+  border-left-color: var(--success);
+}
+
+.booking-row.status-no_show,
+.booking-row.status-cancelled {
+  border-left-color: var(--line);
+  background: var(--surface-sunk);
+  box-shadow: none;
+}
+
+.booking-time {
+  display: grid;
+  font-variant-numeric: tabular-nums;
+}
+
+.booking-info {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.booking-notes {
+  font-style: italic;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.status-badge-booked {
+  background: var(--navy-50);
+  color: var(--navy);
+}
+
+.status-badge-completed {
+  background: var(--success-50);
+  color: var(--success);
+}
+
+.status-badge-no_show {
+  background: var(--warn-50);
+  color: var(--warn);
+}
+
+.status-badge-cancelled {
+  background: var(--line);
+  color: var(--muted);
+}
+
+/* ==========================================================
+   Toasts
+   ========================================================== */
+.toasts {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--tabbar-h) + 16px + env(safe-area-inset-bottom));
+  z-index: 60;
+  display: grid;
+  gap: 8px;
+  width: min(440px, calc(100vw - 24px));
+  transform: translateX(-50%);
+}
+
+@media (min-width: 768px) {
+  .toasts {
+    bottom: 24px;
+  }
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 12px 12px 16px;
+  border-radius: var(--radius);
+  background: var(--ink);
+  color: #fff;
+  font-weight: 500;
+  box-shadow: var(--shadow-lg);
+  animation: toast-in 220ms var(--ease);
+}
+
+.toast span {
+  flex: 1;
+}
+
+.toast button {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.toast-success svg:first-child {
+  color: #6ee7b7;
+}
+
+.toast-error {
+  background: #7f1d1d;
+}
+
+.toast-info svg:first-child {
+  color: #93c5fd;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
