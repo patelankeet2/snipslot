@@ -706,7 +706,7 @@ svg {
   width: var(--size, 56px);
   height: var(--size, 56px);
   color: var(--navy);
-  opacity: 0.13;
+  opacity: 0.18;
   animation: tool-float var(--dur, 14s) ease-in-out var(--delay, 0s) infinite alternate;
 }
 
@@ -715,54 +715,17 @@ svg {
   height: 100%;
 }
 
-.tool-1 {
-  top: 8%;
-  left: 10%;
-  --size: 70px;
-  --dur: 13s;
-  --rot: -20deg;
-}
-.tool-2 {
-  top: 18%;
-  right: 14%;
-  --size: 60px;
-  --dur: 16s;
-  --delay: -4s;
-  --rot: 25deg;
-}
-.tool-3 {
-  bottom: 14%;
-  left: 16%;
-  --size: 64px;
-  --dur: 15s;
-  --delay: -7s;
-  --rot: 15deg;
-}
-.tool-4 {
-  bottom: 9%;
-  right: 10%;
-  --size: 52px;
-  --dur: 12s;
-  --delay: -2s;
-  --rot: 40deg;
+.float-tool-red {
   color: var(--pole-red);
 }
-.tool-5 {
-  top: 48%;
-  left: 4%;
-  --size: 44px;
-  --dur: 17s;
-  --delay: -9s;
-  --rot: -35deg;
-}
-.tool-6 {
-  top: 52%;
-  right: 5%;
-  --size: 48px;
-  --dur: 14s;
-  --delay: -5s;
-  --rot: -10deg;
-  color: var(--pole-red);
+
+/* smaller and fainter on phones so the card stays the focus */
+@media (max-width: 600px) {
+  .float-tool {
+    width: calc(var(--size, 56px) * 0.7);
+    height: calc(var(--size, 56px) * 0.7);
+    opacity: 0.1;
+  }
 }
 
 @keyframes tool-float {
