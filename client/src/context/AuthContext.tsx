@@ -38,7 +38,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // On start up ask the API who we are. If we are offline, trust the cached profile.
   useEffect(() => {
     authApi
-      .me()
+      .session()
       .then(updateUser)
       .catch((err) => {
         if (err instanceof NetworkError) setUser(readCachedUser());
