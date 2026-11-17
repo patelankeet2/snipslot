@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PageHeader } from '../components/PageHeader';
 import { Icon } from '../components/Icon';
+import { InstallCard } from '../components/InstallCard';
 import { useAuth } from '../hooks/useAuth';
 
 export default function ProfilePage() {
@@ -40,6 +41,8 @@ export default function ProfilePage() {
           </span>
         </div>
       </div>
+
+      <InstallCard />
 
       <button
         type="button"
