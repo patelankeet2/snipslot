@@ -3,6 +3,8 @@ import { authApi } from '../api/auth';
 import { NetworkError, UNAUTHORIZED_EVENT } from '../api/client';
 import type { User } from '../types';
 import { AuthContext } from './authContextValue';
+import { API_CACHE, PHOTO_CACHE } from '../offline/cacheNames';
+import { clearOfflineData } from '../offline/bookingCache';
 
 // Only the public profile is remembered (never the token, that lives in an
 // httpOnly cookie) so the app can still open while offline.
@@ -26,6 +28,17 @@ function cacheUser(user: User | null) {
   }
 }
 
+// When nobody is signed in, wipe everything saved for offline use (cached API
+// answers, profile photos, saved bookings, queued changes), so a shared device
+// does not show the last person's appointments.
+function forgetOfflineData() {
+  if ('caches' in window) {
+    caches.delete(API_CACHE).catch(() => undefined);
+    caches.delete(PHOTO_CACHE).catch(() => undefined);
+  }
+  clearOfflineData();
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -33,6 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const updateUser = useCallback((next: User | null) => {
     setUser(next);
     cacheUser(next);
+    if (!next) forgetOfflineData();
   }, []);
 
   // On start up ask the API who we are. If we are offline, trust the cached profile.
