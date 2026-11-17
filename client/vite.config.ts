@@ -58,7 +58,15 @@ export default defineConfig({
       },
     },
   },
+  // `npm run preview` serves the real production build, which is what we use to test offline mode
   preview: {
+    port: 4173,
     headers: { 'Cross-Origin-Opener-Policy': 'same-origin-allow-popups' },
+    proxy: {
+      '/api': {
+        target: 'http://localhost:4000',
+        changeOrigin: true,
+      },
+    },
   },
 });
