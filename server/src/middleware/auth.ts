@@ -7,7 +7,7 @@ import type { Role } from '../models/User';
 
 // The browser sends the httpOnly cookie. Postman and other API clients can
 // send the same token as "Authorization: Bearer <token>" instead.
-function readToken(req: Request): string | null {
+export function readToken(req: Request): string | null {
   const cookieToken = req.cookies?.[SESSION_COOKIE];
   if (cookieToken) return cookieToken;
 
