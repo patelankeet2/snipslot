@@ -3,6 +3,7 @@ import { AuthProvider } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Layout } from './components/Layout';
+import { SyncManager } from './components/SyncManager';
 import LoginPage from './pages/LoginPage';
 import HomeRedirect from './pages/HomeRedirect';
 import ProfilePage from './pages/ProfilePage';
@@ -18,6 +19,8 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <ToastProvider>
+          {/* sends changes made offline once the connection is back */}
+          <SyncManager />
           <Routes>
             <Route path="/login" element={<LoginPage />} />
 
