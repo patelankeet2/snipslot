@@ -311,6 +311,12 @@ svg {
   gap: 20px;
 }
 
+/* grid children default to min-width: auto, which lets wide content (like the
+   scrolling date strip) push the page wider than a phone screen */
+.page > * {
+  min-width: 0;
+}
+
 .page.narrow {
   max-width: 540px;
 }
@@ -1459,4 +1465,430 @@ svg {
     opacity: 0;
     transform: translateY(8px);
   }
+}
+
+/* ==========================================================
+   Booking flow
+   ========================================================== */
+.small {
+  font-size: 0.85rem;
+}
+
+.section-title {
+  margin: 4px 0 12px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.empty-inline {
+  padding: 18px;
+  text-align: center;
+  color: var(--muted);
+  background: var(--surface-sunk);
+  border-radius: var(--radius-sm);
+}
+
+/* step indicator: 1 Service, 2 Barber, 3 Time, 4 Confirm */
+.stepper {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.stepper li {
+  position: relative;
+}
+
+/* the line joining one step to the next */
+.stepper li:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 17px;
+  left: calc(50% + 22px);
+  right: calc(-50% + 22px);
+  height: 2px;
+  background: var(--line);
+}
+
+.stepper li.is-done:not(:last-child)::after {
+  background: var(--navy);
+}
+
+.stepper button {
+  width: 100%;
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.stepper button:disabled {
+  cursor: default;
+}
+
+.step-dot {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+  background: var(--surface);
+  font-weight: 700;
+  font-size: 0.9rem;
+  transition:
+    background var(--speed) var(--ease),
+    border-color var(--speed) var(--ease);
+}
+
+.stepper .is-current .step-dot {
+  border-color: var(--navy);
+  color: var(--navy);
+  box-shadow: 0 0 0 4px var(--navy-50);
+}
+
+.stepper .is-done .step-dot {
+  border-color: var(--navy);
+  background: var(--navy);
+  color: #fff;
+}
+
+.step-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.stepper .is-current .step-label {
+  color: var(--navy);
+}
+
+/* big tappable choice rows for services and barbers */
+.choice-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.choice {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition:
+    border-color var(--speed) var(--ease),
+    box-shadow var(--speed) var(--ease),
+    transform var(--speed) var(--ease);
+}
+
+.choice:hover {
+  border-color: var(--navy-600);
+  box-shadow: var(--shadow);
+}
+
+.choice:active {
+  transform: scale(0.99);
+}
+
+.choice.is-selected {
+  border-color: var(--navy);
+  box-shadow: 0 0 0 3px var(--navy-50);
+}
+
+.choice-main {
+  flex: 1;
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.choice-side {
+  display: grid;
+  justify-items: end;
+  gap: 2px;
+  white-space: nowrap;
+}
+
+.choice-arrow {
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+/* next 14 days */
+.date-strip {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 2px 2px 10px;
+  margin-bottom: 8px;
+  scroll-snap-type: x proximity;
+}
+
+.date-chip {
+  flex: 0 0 auto;
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  min-width: 62px;
+  padding: 10px 6px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+  scroll-snap-align: start;
+  transition:
+    background var(--speed) var(--ease),
+    border-color var(--speed) var(--ease);
+}
+
+.date-chip:hover:not(:disabled) {
+  border-color: var(--navy-600);
+}
+
+.date-chip:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: var(--surface-sunk);
+}
+
+.date-chip.is-selected {
+  background: var(--navy);
+  border-color: var(--navy);
+  color: #fff;
+}
+
+.date-chip-dow {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.date-chip-day {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+/* free times */
+.slot-groups {
+  display: grid;
+  gap: 16px;
+}
+
+.slot-group-title {
+  margin: 0 0 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+
+.slot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+  gap: 8px;
+}
+
+.slot {
+  min-height: 44px;
+  border: 1px solid var(--success);
+  border-radius: var(--radius-sm);
+  background: var(--success-50);
+  color: var(--success);
+  font: inherit;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition:
+    background var(--speed) var(--ease),
+    color var(--speed) var(--ease);
+}
+
+.slot:hover {
+  background: #d1efe4;
+}
+
+.slot.is-selected {
+  background: var(--success);
+  color: #fff;
+}
+
+/* confirm step */
+.summary .field {
+  margin-top: 16px;
+}
+
+.summary-list {
+  margin: 0;
+  display: grid;
+  gap: 0;
+}
+
+.summary-list div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.summary-list dt {
+  color: var(--muted);
+}
+
+.summary-list dd {
+  margin: 0;
+  font-weight: 600;
+  text-align: right;
+}
+
+/* booked! */
+.success-card {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 36px 20px;
+  text-align: center;
+}
+
+.success-icon {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  margin-bottom: 8px;
+  border-radius: 50%;
+  background: var(--success-50);
+  color: var(--success);
+  animation: pop 400ms var(--ease);
+}
+
+@keyframes pop {
+  from {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+}
+
+.success-when {
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.form-actions.center {
+  justify-content: center;
+  margin-top: 12px;
+}
+
+/* ==========================================================
+   My bookings
+   ========================================================== */
+.tabs {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--surface-sunk);
+  justify-self: start;
+}
+
+.tabs button {
+  min-height: 40px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background var(--speed) var(--ease),
+    color var(--speed) var(--ease);
+}
+
+.tabs button.is-active {
+  background: var(--surface);
+  color: var(--navy);
+  box-shadow: var(--shadow-sm);
+}
+
+.booking-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.my-booking {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: 14px;
+  align-items: start;
+}
+
+.my-booking .item-actions {
+  grid-column: 2;
+}
+
+@media (min-width: 768px) {
+  .my-booking {
+    grid-template-columns: 70px 1fr auto;
+    align-items: center;
+  }
+  .my-booking .item-actions {
+    grid-column: auto;
+  }
+}
+
+.my-booking.status-cancelled,
+.my-booking.status-no_show {
+  background: var(--surface-sunk);
+  box-shadow: none;
+}
+
+.date-badge {
+  display: grid;
+  justify-items: center;
+  padding: 8px 4px;
+  border-radius: var(--radius-sm);
+  background: var(--navy);
+  color: #fff;
+  line-height: 1.15;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.date-badge strong {
+  font-size: 1.5rem;
+  letter-spacing: 0;
+}
+
+.my-booking.status-cancelled .date-badge,
+.my-booking.status-no_show .date-badge {
+  background: var(--muted);
 }
