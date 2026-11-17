@@ -40,7 +40,13 @@ export const requireRole =
   (req, _res, next) => {
     if (!req.user) return next(AppError.unauthorized());
     if (!allowed.includes(req.user.role)) {
-      return next(AppError.forbidden('Only the shop owner can do this'));
+      return next(
+        AppError.forbidden(
+          allowed.includes('owner')
+            ? 'Only the shop owner can do this'
+            : 'This is only available to customers',
+        ),
+      );
     }
     next();
   };
