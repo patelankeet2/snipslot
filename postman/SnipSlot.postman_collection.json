@@ -12,6 +12,30 @@
     {
       "key": "barberId",
       "value": ""
+    },
+    {
+      "key": "bookServiceId",
+      "value": ""
+    },
+    {
+      "key": "bookBarberId",
+      "value": ""
+    },
+    {
+      "key": "bookDate",
+      "value": ""
+    },
+    {
+      "key": "slotStart",
+      "value": ""
+    },
+    {
+      "key": "laterSlotStart",
+      "value": ""
+    },
+    {
+      "key": "bookingId",
+      "value": ""
     }
   ],
   "item": [
@@ -286,7 +310,10 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
-                  "pm.test(\"Returns an array\", () => pm.expect(pm.response.json().services).to.be.an(\"array\"));"
+                  "pm.test(\"Returns an array\", () => pm.expect(pm.response.json().services).to.be.an(\"array\"));",
+                  "// remember a service to book in the Bookings folder",
+                  "const cut = pm.response.json().services.find(x => x.name === \"Classic Cut\") || pm.response.json().services[0];",
+                  "pm.collectionVariables.set(\"bookServiceId\", cut.id);"
                 ]
               }
             }
@@ -603,7 +630,9 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "// remember a barber to book with",
+                  "pm.collectionVariables.set(\"bookBarberId\", pm.response.json().barbers[0].id);"
                 ]
               }
             }
@@ -848,6 +877,559 @@
                 "exec": [
                   "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
                   "pm.test(\"Thursday late night saved\", () => pm.expect(pm.response.json().settings.openingHours[4].close).to.eql(\"20:00\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Bookings",
+      "item": [
+        {
+          "name": "Free slots",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/slots?serviceId={{bookServiceId}}&barberId={{bookBarberId}}&date={{bookDate}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "slots"
+              ],
+              "query": [
+                {
+                  "key": "serviceId",
+                  "value": "{{bookServiceId}}"
+                },
+                {
+                  "key": "barberId",
+                  "value": "{{bookBarberId}}"
+                },
+                {
+                  "key": "date",
+                  "value": "{{bookDate}}"
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "const slots = pm.response.json().slots;",
+                  "pm.test(\"Has free slots\", () => pm.expect(slots.length).to.be.above(5));",
+                  "pm.collectionVariables.set(\"slotStart\", slots[2].start);",
+                  "pm.collectionVariables.set(\"laterSlotStart\", slots[slots.length - 2].start);"
+                ]
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// pick a Wednesday or Thursday at least two days ahead (both barbers work then)",
+                  "const d = new Date(Date.now() + 2 * 86400000);",
+                  "while (![3, 4].includes(d.getUTCDay())) d.setUTCDate(d.getUTCDate() + 1);",
+                  "pm.collectionVariables.set(\"bookDate\", d.toISOString().slice(0, 10));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create booking",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/bookings",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "bookings"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"serviceId\": \"{{bookServiceId}}\",\n  \"barberId\": \"{{bookBarberId}}\",\n  \"start\": \"{{slotStart}}\",\n  \"notes\": \"Booked from Postman\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+                  "const b = pm.response.json().booking;",
+                  "pm.test(\"Status is booked\", () => pm.expect(b.status).to.eql(\"booked\"));",
+                  "pm.test(\"Starts at the chosen slot\", () => pm.expect(b.start).to.eql(pm.collectionVariables.get(\"slotStart\")));",
+                  "pm.collectionVariables.set(\"bookingId\", b.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "409 double booking the same slot",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/bookings",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "bookings"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"serviceId\": \"{{bookServiceId}}\",\n  \"barberId\": \"{{bookBarberId}}\",\n  \"start\": \"{{slotStart}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 409\", () => pm.response.to.have.status(409));",
+                  "pm.test(\"Error code is CONFLICT\", () => pm.expect(pm.response.json().error.code).to.eql(\"CONFLICT\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "403 owner cannot book",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/bookings",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "bookings"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"serviceId\": \"{{bookServiceId}}\",\n  \"barberId\": \"{{bookBarberId}}\",\n  \"start\": \"{{laterSlotStart}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 403\", () => pm.response.to.have.status(403));",
+                  "pm.test(\"Error code is FORBIDDEN\", () => pm.expect(pm.response.json().error.code).to.eql(\"FORBIDDEN\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "My upcoming bookings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/bookings/mine?scope=upcoming",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "bookings",
+                "mine"
+              ],
+              "query": [
+                {
+                  "key": "scope",
+                  "value": "upcoming"
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"New booking is listed\", () => pm.expect(pm.response.json().bookings.map(b => b.id)).to.include(pm.collectionVariables.get(\"bookingId\")));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get booking by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/bookings/{{bookingId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "bookings",
+                "{{bookingId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reschedule booking",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/bookings/{{bookingId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "bookings",
+                "{{bookingId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"start\": \"{{laterSlotStart}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Moved to the new time\", () => pm.expect(pm.response.json().booking.start).to.eql(pm.collectionVariables.get(\"laterSlotStart\")));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Owner sees it on the schedule",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/bookings/schedule?date={{bookDate}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "bookings",
+                "schedule"
+              ],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "{{bookDate}}"
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ownerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Booking is on the day view\", () => pm.expect(pm.response.json().bookings.map(b => b.id)).to.include(pm.collectionVariables.get(\"bookingId\")));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cancel booking",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/bookings/{{bookingId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "bookings",
+                "{{bookingId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Status is cancelled\", () => pm.expect(pm.response.json().booking.status).to.eql(\"cancelled\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "409 cancel twice",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/bookings/{{bookingId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "bookings",
+                "{{bookingId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 409\", () => pm.response.to.have.status(409));",
+                  "pm.test(\"Error code is CONFLICT\", () => pm.expect(pm.response.json().error.code).to.eql(\"CONFLICT\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "400 bad slot request",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/slots?serviceId=abc&barberId={{bookBarberId}}&date=18-11-2026",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "slots"
+              ],
+              "query": [
+                {
+                  "key": "serviceId",
+                  "value": "abc"
+                },
+                {
+                  "key": "barberId",
+                  "value": "{{bookBarberId}}"
+                },
+                {
+                  "key": "date",
+                  "value": "18-11-2026"
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customerToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Explains both bad fields\", () => pm.expect(pm.response.json().error.details.length).to.be.at.least(2));"
                 ]
               }
             }
