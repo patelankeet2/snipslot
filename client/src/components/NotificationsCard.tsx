@@ -36,7 +36,11 @@ export function NotificationsCard() {
       if (next === 'disabled' && status === 'enabled') notify('Notifications turned off', 'info');
       if (next === 'denied') notify('Notifications were blocked', 'error');
     } catch (err) {
-      notify(errorMessage(err), 'error');
+      // show the real reason for browser errors, our friendly text for API errors
+      notify(
+        err instanceof Error && err.name === 'Error' ? err.message : errorMessage(err),
+        'error',
+      );
     } finally {
       setBusy(false);
     }
@@ -51,7 +55,11 @@ export function NotificationsCard() {
         'info',
       );
     } catch (err) {
-      notify(errorMessage(err), 'error');
+      // show the real reason for browser errors, our friendly text for API errors
+      notify(
+        err instanceof Error && err.name === 'Error' ? err.message : errorMessage(err),
+        'error',
+      );
     } finally {
       setBusy(false);
     }

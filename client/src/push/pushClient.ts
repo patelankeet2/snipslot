@@ -47,10 +47,19 @@ export async function enablePush(): Promise<PushStatus> {
   const existing = await reg.pushManager.getSubscription();
   if (existing) await existing.unsubscribe();
 
-  const subscription = await reg.pushManager.subscribe({
-    userVisibleOnly: true, // every push must show a notification (required by browsers)
-    applicationServerKey: urlBase64ToUint8Array(publicKey),
-  });
+  let subscription: PushSubscription;
+  try {
+    subscription = await reg.pushManager.subscribe({
+      userVisibleOnly: true, // every push must show a notification (required by browsers)
+      applicationServerKey: urlBase64ToUint8Array(publicKey),
+    });
+  } catch (err) {
+    // The browser's push service refused (eg it is unreachable, or blocked by a setting).
+    // Keep the browser's own reason so the problem can actually be diagnosed.
+    console.error('Push subscription failed', err);
+    const reason = err instanceof Error ? `${err.name}: ${err.message}` : String(err);
+    throw new Error(`The browser could not turn on push (${reason})`, { cause: err });
+  }
   await pushApi.subscribe(subscription.toJSON());
   return 'enabled';
 }
