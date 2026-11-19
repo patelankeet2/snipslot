@@ -10,6 +10,8 @@ export const barberCreateSchema = z.object({
   bio: z.string().trim().max(300, 'Keep the bio under 300 characters').optional(),
   workingDays: workingDays.default([1, 2, 3, 4, 5]),
   active: z.boolean().optional(),
+  // URL from POST /api/uploads/image, or an empty string to remove the photo
+  photoUrl: z.union([z.url().max(500), z.literal('')]).optional(),
 });
 
 export const barberUpdateSchema = z
@@ -18,6 +20,7 @@ export const barberUpdateSchema = z
     bio: barberCreateSchema.shape.bio,
     workingDays,
     active: z.boolean(),
+    photoUrl: barberCreateSchema.shape.photoUrl,
   })
   .partial()
   .refine((data) => Object.keys(data).length > 0, 'Nothing to update');

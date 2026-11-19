@@ -1,12 +1,14 @@
 import type { BarberRepository } from '../repositories/BarberRepository';
 import type { BookingRepository } from '../repositories/BookingRepository';
 import type { BarberInput } from '../validators/barber.schemas';
+import type { MediaService } from './MediaService';
 import { AppError } from '../utils/AppError';
 
 export class BarberService {
   constructor(
     private readonly barbers: BarberRepository,
     private readonly bookings: BookingRepository,
+    private readonly media: MediaService,
   ) {}
 
   list(includeInactive: boolean) {
@@ -20,12 +22,21 @@ export class BarberService {
   }
 
   create(input: BarberInput) {
+    this.assertOwnPhoto(input.photoUrl);
     return this.barbers.create(input);
   }
 
   async update(id: string, changes: Partial<BarberInput>) {
+    this.assertOwnPhoto(changes.photoUrl);
+    const before = await this.get(id);
+
     const barber = await this.barbers.updateById(id, changes);
     if (!barber) throw AppError.notFound('Barber not found');
+
+    // new or removed photo: clean up the old file in S3
+    if (changes.photoUrl !== undefined && before.photoUrl !== changes.photoUrl) {
+      void this.media.deletePhoto(before.photoUrl);
+    }
     return barber;
   }
 
@@ -51,6 +62,14 @@ export class BarberService {
     }
 
     await this.barbers.deleteById(id);
+    void this.media.deletePhoto(barber.photoUrl);
     return { archived: false };
+  }
+
+  // only accept photos that were uploaded through our own upload endpoint
+  private assertOwnPhoto(url?: string) {
+    if (url && !this.media.isOurPhoto(url)) {
+      throw AppError.badRequest('Upload the photo through the app first');
+    }
   }
 }

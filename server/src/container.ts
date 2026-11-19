@@ -10,6 +10,7 @@ import { CatalogService } from './services/CatalogService';
 import { BarberService } from './services/BarberService';
 import { SettingsService } from './services/SettingsService';
 import { BookingService } from './services/BookingService';
+import { MediaService } from './services/MediaService';
 import { PushSubscriptionRepository } from './repositories/PushSubscriptionRepository';
 import { PushService } from './services/PushService';
 import { NotificationFactory } from './notifications/NotificationFactory';
@@ -28,8 +29,13 @@ export const authService = new AuthService(
   new GoogleTokenVerifier(env.GOOGLE_CLIENT_ID),
   env.ownerEmails,
 );
-export const catalogService = new CatalogService(serviceRepository, bookingRepository);
-export const barberService = new BarberService(barberRepository, bookingRepository);
+export const mediaService = new MediaService();
+export const catalogService = new CatalogService(
+  serviceRepository,
+  bookingRepository,
+  mediaService,
+);
+export const barberService = new BarberService(barberRepository, bookingRepository, mediaService);
 export const settingsService = new SettingsService(settingsRepository);
 export const bookingService = new BookingService(
   bookingRepository,

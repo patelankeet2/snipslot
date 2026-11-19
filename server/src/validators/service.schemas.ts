@@ -11,6 +11,8 @@ export const serviceCreateSchema = z.object({
     .refine((v) => v % 5 === 0, 'Use 5 minute steps'),
   price: z.coerce.number().min(0, 'Price cannot be negative').max(1000, 'Price looks too high'),
   active: z.boolean().optional(),
+  // URL from POST /api/uploads/image, or an empty string to remove the photo
+  photoUrl: z.union([z.url().max(500), z.literal('')]).optional(),
 });
 
 // same rules, every field optional, but at least one has to be sent
