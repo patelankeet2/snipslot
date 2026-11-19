@@ -5,6 +5,7 @@ import { Spinner } from '../../components/Spinner';
 import { Modal } from '../../components/Modal';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 import { Icon } from '../../components/Icon';
+import { PersonPhoto } from '../../components/PersonPhoto';
 import { BarberForm } from '../../components/owner/BarberForm';
 import { HoursEditor } from '../../components/owner/HoursEditor';
 import { barbersApi, settingsApi, type BarberInput } from '../../api/catalog';
@@ -91,9 +92,7 @@ export default function BarbersPage() {
           {barbers.data.map((barber) => (
             <li key={barber.id} className={`card item-card${barber.active ? '' : ' is-archived'}`}>
               <div className="item-main barber-main">
-                <span className="avatar avatar-md avatar-fallback" aria-hidden="true">
-                  {barber.name.charAt(0)}
-                </span>
+                <PersonPhoto name={barber.name} photoUrl={barber.photoUrl} />
                 <div>
                   <div className="item-title">
                     <h2>{barber.name}</h2>

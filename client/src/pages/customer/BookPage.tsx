@@ -4,6 +4,7 @@ import { PageHeader } from '../../components/PageHeader';
 import { EmptyState } from '../../components/EmptyState';
 import { Spinner } from '../../components/Spinner';
 import { Icon } from '../../components/Icon';
+import { PersonPhoto } from '../../components/PersonPhoto';
 import { DateStrip } from '../../components/booking/DateStrip';
 import { SlotGrid } from '../../components/booking/SlotGrid';
 import { barbersApi, servicesApi, settingsApi } from '../../api/catalog';
@@ -162,6 +163,9 @@ export default function BookPage() {
                 className={`choice${service?.id === s.id ? ' is-selected' : ''}`}
                 onClick={() => pickService(s)}
               >
+                {s.photoUrl && (
+                  <img className="choice-thumb" src={s.photoUrl} alt="" loading="lazy" />
+                )}
                 <span className="choice-main">
                   <strong>{s.name}</strong>
                   {s.description && <span className="muted">{s.description}</span>}
@@ -186,9 +190,7 @@ export default function BookPage() {
                 className={`choice${barber?.id === b.id ? ' is-selected' : ''}`}
                 onClick={() => pickBarber(b)}
               >
-                <span className="avatar avatar-md avatar-fallback" aria-hidden="true">
-                  {b.name.charAt(0)}
-                </span>
+                <PersonPhoto name={b.name} photoUrl={b.photoUrl} />
                 <span className="choice-main">
                   <strong>{b.name}</strong>
                   {b.bio && <span className="muted">{b.bio}</span>}

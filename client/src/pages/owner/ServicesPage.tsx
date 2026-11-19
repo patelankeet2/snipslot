@@ -97,6 +97,9 @@ export default function ServicesPage() {
               key={service.id}
               className={`card item-card${service.active ? '' : ' is-archived'}`}
             >
+              {service.photoUrl && (
+                <img className="card-photo" src={service.photoUrl} alt="" loading="lazy" />
+              )}
               <div className="item-main">
                 <div className="item-title">
                   <h2>{service.name}</h2>
