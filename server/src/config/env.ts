@@ -16,6 +16,15 @@ const envSchema = z.object({
   GOOGLE_CLIENT_ID: z.string().min(1, 'GOOGLE_CLIENT_ID is required'),
   OWNER_EMAILS: z.string().default(''),
   LOG_LEVEL: z.enum(['error', 'warn', 'info', 'http', 'debug']).default('info'),
+  // Web Push keys (npx web-push generate-vapid-keys). The private key never leaves the server.
+  VAPID_PUBLIC_KEY: z.string().min(1, 'VAPID_PUBLIC_KEY is required'),
+  VAPID_PRIVATE_KEY: z.string().min(1, 'VAPID_PRIVATE_KEY is required'),
+  VAPID_SUBJECT: z
+    .string()
+    .regex(/^(mailto:|https:)/, 'VAPID_SUBJECT must start with mailto: or https:'),
+  // run the reminder job inside this process (local dev); production uses the HTTP trigger
+  ENABLE_CRON: z.enum(['true', 'false']).default('false'),
+  CRON_SECRET: z.string().min(16, 'CRON_SECRET must be at least 16 characters'),
 });
 
 const parsed = envSchema.safeParse(process.env);
@@ -38,6 +47,7 @@ export const env = {
   ...raw,
   isProd: raw.NODE_ENV === 'production',
   isTest: raw.NODE_ENV === 'test',
+  cronEnabled: raw.ENABLE_CRON === 'true',
   clientOrigins: splitList(raw.CLIENT_ORIGIN),
   // compare emails in lower case so "Owner@Gmail.com" still matches
   ownerEmails: splitList(raw.OWNER_EMAILS).map((e) => e.toLowerCase()),
