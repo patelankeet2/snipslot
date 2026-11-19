@@ -104,3 +104,12 @@ npm run preview   # http://localhost:4173, /api is proxied to the server
 ```
 
 Then in Chrome DevTools > Network choose "Offline" and reload.
+
+## Push notifications
+
+- VAPID keys are generated with `npx web-push generate-vapid-keys` and kept in `server/.env`. Only the public key is ever sent to the browser.
+- The owner gets a push when a customer books, moves or cancels. Customers get a reminder before their appointment (60 minutes by default).
+- Booking changes are published as events (`booking.created`, `booking.rescheduled`, `booking.cancelled`, `booking.reminder`). A listener turns them into notifications, so the booking code does not know about push at all.
+- Subscriptions that the browser has dropped (404 or 410 from the push service) are deleted automatically.
+- Locally the reminder job runs every 5 minutes inside the server (`ENABLE_CRON=true`). In production a scheduled job calls `POST /api/jobs/reminders` with the `x-cron-secret` header.
+- Turn notifications on from the Profile page. On iPhone, push only works after the app has been added to the home screen.
