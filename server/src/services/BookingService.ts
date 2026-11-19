@@ -10,6 +10,8 @@ import type { BookingCreateInput, BookingRescheduleInput } from '../validators/b
 import { AppError } from '../utils/AppError';
 import { dayRange, todayIn } from '../utils/time';
 import { computeSlots } from '../utils/slots';
+import { bookingEvents } from '../events/bookingEvents';
+import { toEventData } from '../events/toEventData';
 
 interface Actor {
   id: string;
@@ -99,7 +101,10 @@ export class BookingService {
         priceAtBooking: service.price,
         notes: input.notes,
       });
-      return this.withDetails(booking);
+      const detailed = await this.withDetails(booking);
+      // let listeners (eg push to the owner) react without the booking code knowing about them
+      bookingEvents.emit('booking.created', toEventData(detailed, 'customer'));
+      return detailed;
     } catch (err) {
       // two people pressed "book" for the same slot at the same moment;
       // the unique index lets only one of them through
@@ -130,6 +135,7 @@ export class BookingService {
       booking.id,
     );
 
+    const previousStart = booking.start;
     // a new time means a new reminder
     booking.set({ barber: barber._id, start, end, reminderSent: false });
     try {
@@ -139,7 +145,12 @@ export class BookingService {
         throw AppError.conflict('Someone just booked that time. Please pick another.');
       throw err;
     }
-    return this.withDetails(booking);
+    const detailed = await this.withDetails(booking);
+    bookingEvents.emit('booking.rescheduled', {
+      ...toEventData(detailed, actor.role),
+      previousStart,
+    });
+    return detailed;
   }
 
   // Cancelling keeps the record (status "cancelled") so the history stays complete
@@ -150,7 +161,9 @@ export class BookingService {
     booking.status = 'cancelled';
     booking.cancelledAt = new Date();
     await booking.save();
-    return this.withDetails(booking);
+    const detailed = await this.withDetails(booking);
+    bookingEvents.emit('booking.cancelled', toEventData(detailed, actor.role));
+    return detailed;
   }
 
   // ---------- owner actions ----------
