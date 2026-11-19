@@ -111,3 +111,52 @@ self.addEventListener('sync', (event: Event) => {
   const syncEvent = event as SyncEvent;
   if (syncEvent.tag === SYNC_TAG) syncEvent.waitUntil(replayOutbox());
 });
+
+// ---------- Push notifications ----------
+
+interface PushPayload {
+  title: string;
+  body: string;
+  url?: string;
+  tag?: string;
+}
+
+// The server sends an encrypted JSON payload; the browser decrypts it for us
+self.addEventListener('push', (event) => {
+  let payload: PushPayload = { title: 'SnipSlot', body: 'You have a new update.' };
+  try {
+    if (event.data) payload = { ...payload, ...event.data.json() };
+  } catch {
+    // plain text push (eg the DevTools "Push" button)
+    if (event.data) payload.body = event.data.text();
+  }
+
+  event.waitUntil(
+    self.registration.showNotification(payload.title, {
+      body: payload.body,
+      icon: '/pwa-192x192.png',
+      badge: '/pwa-64x64.png',
+      tag: payload.tag, // a newer push with the same tag replaces the old one
+      data: { url: payload.url ?? '/' },
+    }),
+  );
+});
+
+// Tapping a notification focuses an open SnipSlot window, or opens a new one
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const target = new URL(event.notification.data?.url ?? '/', self.location.origin).href;
+
+  event.waitUntil(
+    (async () => {
+      const windows = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+      const existing = windows.find((w) => w.url.startsWith(self.location.origin));
+      if (existing) {
+        await existing.focus();
+        await existing.navigate(target);
+      } else {
+        await self.clients.openWindow(target);
+      }
+    })(),
+  );
+});
