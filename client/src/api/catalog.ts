@@ -3,10 +3,15 @@ import type { Barber, Booking, BookingStatus, OpeningHours, Service, ShopSetting
 
 export type ServiceInput = Pick<Service, 'name' | 'durationMin' | 'price'> & {
   description?: string;
+  photoUrl?: string;
   active?: boolean;
 };
 
-export type BarberInput = Pick<Barber, 'name' | 'workingDays'> & { bio?: string; active?: boolean };
+export type BarberInput = Pick<Barber, 'name' | 'workingDays'> & {
+  bio?: string;
+  active?: boolean;
+  photoUrl?: string;
+};
 
 export const servicesApi = {
   list: (all = false) =>

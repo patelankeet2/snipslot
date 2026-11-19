@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { FormField } from '../FormField';
+import { PhotoField } from './PhotoField';
 import { ApiError, errorMessage } from '../../api/client';
 import type { ServiceInput } from '../../api/catalog';
 import type { Service } from '../../types';
@@ -21,6 +22,8 @@ export function ServiceForm({ initial, onSubmit, onCancel }: Props) {
   const [errors, setErrors] = useState<FieldErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [photoUrl, setPhotoUrl] = useState(initial?.photoUrl ?? '');
+  const [uploading, setUploading] = useState(false);
 
   const set = (field: keyof typeof values) => (value: string) =>
     setValues((v) => ({ ...v, [field]: value }));
@@ -49,7 +52,7 @@ export function ServiceForm({ initial, onSubmit, onCancel }: Props) {
 
     setSaving(true);
     try {
-      await onSubmit(result.data);
+      await onSubmit({ ...result.data, photoUrl });
     } catch (err) {
       // show the server's field messages next to the right inputs
       if (err instanceof ApiError && err.details) {
@@ -123,11 +126,19 @@ export function ServiceForm({ initial, onSubmit, onCancel }: Props) {
         </p>
       )}
 
+      <PhotoField
+        value={photoUrl}
+        onChange={setPhotoUrl}
+        folder="services"
+        label="Photo (optional)"
+        onBusyChange={setUploading}
+      />
+
       <div className="form-actions">
         <button type="button" className="btn btn-ghost" onClick={onCancel} disabled={saving}>
           Cancel
         </button>
-        <button type="submit" className="btn btn-primary" disabled={saving}>
+        <button type="submit" className="btn btn-primary" disabled={saving || uploading}>
           {saving ? 'Saving...' : initial ? 'Save changes' : 'Add service'}
         </button>
       </div>

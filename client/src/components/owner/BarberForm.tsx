@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { FormField } from '../FormField';
+import { PhotoField } from './PhotoField';
 import { ApiError, errorMessage } from '../../api/client';
 import type { BarberInput } from '../../api/catalog';
 import type { Barber } from '../../types';
@@ -22,6 +23,8 @@ export function BarberForm({ initial, onSubmit, onCancel }: Props) {
   const [errors, setErrors] = useState<FieldErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [photoUrl, setPhotoUrl] = useState(initial?.photoUrl ?? '');
+  const [uploading, setUploading] = useState(false);
 
   const toggleDay = (day: number) =>
     setWorkingDays((days) =>
@@ -41,7 +44,7 @@ export function BarberForm({ initial, onSubmit, onCancel }: Props) {
 
     setSaving(true);
     try {
-      await onSubmit(result.data);
+      await onSubmit({ ...result.data, photoUrl });
     } catch (err) {
       if (err instanceof ApiError && err.details) {
         setErrors(Object.fromEntries(err.details.map((d) => [d.field, d.message])));
@@ -96,11 +99,19 @@ export function BarberForm({ initial, onSubmit, onCancel }: Props) {
         </p>
       )}
 
+      <PhotoField
+        value={photoUrl}
+        onChange={setPhotoUrl}
+        folder="barbers"
+        label="Photo (optional)"
+        onBusyChange={setUploading}
+      />
+
       <div className="form-actions">
         <button type="button" className="btn btn-ghost" onClick={onCancel} disabled={saving}>
           Cancel
         </button>
-        <button type="submit" className="btn btn-primary" disabled={saving}>
+        <button type="submit" className="btn btn-primary" disabled={saving || uploading}>
           {saving ? 'Saving...' : initial ? 'Save changes' : 'Add barber'}
         </button>
       </div>
