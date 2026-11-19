@@ -8,6 +8,7 @@ import bookingRoutes from './booking.routes';
 import slotRoutes from './slot.routes';
 import pushRoutes from './push.routes';
 import jobRoutes from './job.routes';
+import uploadRoutes from './upload.routes';
 import { apiLimiter } from '../middleware/rateLimit';
 
 // All API routes are mounted here under /api
@@ -25,5 +26,6 @@ router.use('/settings', settingsRoutes);
 router.use('/slots', slotRoutes);
 router.use('/bookings', bookingRoutes);
 router.use('/push', pushRoutes);
+router.use('/uploads', uploadRoutes);
 
 export default router;
