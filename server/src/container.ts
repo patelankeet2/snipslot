@@ -10,6 +10,10 @@ import { CatalogService } from './services/CatalogService';
 import { BarberService } from './services/BarberService';
 import { SettingsService } from './services/SettingsService';
 import { BookingService } from './services/BookingService';
+import { PushSubscriptionRepository } from './repositories/PushSubscriptionRepository';
+import { PushService } from './services/PushService';
+import { NotificationFactory } from './notifications/NotificationFactory';
+import { ReminderJob } from './jobs/reminderJob';
 
 // Composition root: every service gets its dependencies here, in one place.
 // Controllers import from this file instead of creating things themselves.
@@ -33,3 +37,9 @@ export const bookingService = new BookingService(
   serviceRepository,
   barberRepository,
 );
+
+// push notifications and the reminder job
+const pushSubscriptionRepository = new PushSubscriptionRepository();
+export const pushService = new PushService(pushSubscriptionRepository, userRepository);
+export const notificationFactory = new NotificationFactory();
+export const reminderJob = new ReminderJob(bookingRepository, settingsRepository);

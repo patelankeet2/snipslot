@@ -2,10 +2,16 @@ import { createApp } from './app';
 import { env } from './config/env';
 import { database } from './config/db';
 import { logger } from './utils/logger';
+import { notificationFactory, pushService, reminderJob } from './container';
+import { registerNotificationListener } from './listeners/notificationListener';
 
 async function start() {
   // connect first so we never accept requests we cannot serve
   await database.connect();
+
+  // booking events now trigger push notifications
+  registerNotificationListener(pushService, notificationFactory);
+  if (env.cronEnabled) reminderJob.schedule();
 
   const app = createApp();
   const server = app.listen(env.PORT, () => {
