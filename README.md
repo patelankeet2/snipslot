@@ -113,3 +113,13 @@ Then in Chrome DevTools > Network choose "Offline" and reload.
 - Subscriptions that the browser has dropped (404 or 410 from the push service) are deleted automatically.
 - Locally the reminder job runs every 5 minutes inside the server (`ENABLE_CRON=true`). In production a scheduled job calls `POST /api/jobs/reminders` with the `x-cron-secret` header.
 - Turn notifications on from the Profile page. On iPhone, push only works after the app has been added to the home screen.
+
+## Photos on AWS S3
+
+The owner can add a photo to each service and barber. The file goes to `POST /api/uploads/image`, which:
+
+- only accepts JPG, PNG or WebP up to 2 MB, and checks the file's first bytes rather than trusting its name or type
+- stores it in S3 under `public/<folder>/<random id>.<ext>` with a long cache lifetime
+- returns the URL, which the form then saves on the service or barber
+
+Only URLs from our own bucket are accepted when saving, and the old file is deleted from S3 when a photo is replaced or its service or barber is removed. The bucket blocks public access except for reading the `public/` folder, and the server uses an IAM user that can only put and delete objects in that folder. Without the S3 settings in `.env` the app still works and uploads answer 503.
