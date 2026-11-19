@@ -10,7 +10,7 @@ import { CacheFirst, NetworkFirst, StaleWhileRevalidate } from 'workbox-strategi
 import { ExpirationPlugin } from 'workbox-expiration';
 import { CacheableResponsePlugin } from 'workbox-cacheable-response';
 import { flushOutbox, SYNC_TAG } from './offline/outbox';
-import { API_CACHE, PHOTO_CACHE } from './offline/cacheNames';
+import { API_CACHE, MEDIA_CACHE, PHOTO_CACHE } from './offline/cacheNames';
 
 declare let self: ServiceWorkerGlobalScope;
 
@@ -84,6 +84,19 @@ registerRoute(
     plugins: [
       new CacheableResponsePlugin({ statuses: [0, 200] }),
       new ExpirationPlugin({ maxEntries: 30, maxAgeSeconds: 30 * 24 * 60 * 60 }),
+    ],
+  }),
+);
+
+// Barber and service photos from S3. Each upload gets a new random name, so a
+// cached copy can never go stale: cache first and keep them for a month.
+registerRoute(
+  ({ url, request }) => request.destination === 'image' && url.hostname.endsWith('.amazonaws.com'),
+  new CacheFirst({
+    cacheName: MEDIA_CACHE,
+    plugins: [
+      new CacheableResponsePlugin({ statuses: [0, 200] }),
+      new ExpirationPlugin({ maxEntries: 60, maxAgeSeconds: 30 * 24 * 60 * 60 }),
     ],
   }),
 );
