@@ -25,6 +25,11 @@ const envSchema = z.object({
   // run the reminder job inside this process (local dev); production uses the HTTP trigger
   ENABLE_CRON: z.enum(['true', 'false']).default('false'),
   CRON_SECRET: z.string().min(16, 'CRON_SECRET must be at least 16 characters'),
+  // S3 photo uploads. Optional: without them the app works, uploads just answer 503.
+  AWS_REGION: z.string().default('ap-southeast-2'),
+  S3_BUCKET: z.string().optional(),
+  AWS_ACCESS_KEY_ID: z.string().optional(),
+  AWS_SECRET_ACCESS_KEY: z.string().optional(),
 });
 
 const parsed = envSchema.safeParse(process.env);
@@ -48,6 +53,7 @@ export const env = {
   isProd: raw.NODE_ENV === 'production',
   isTest: raw.NODE_ENV === 'test',
   cronEnabled: raw.ENABLE_CRON === 'true',
+  uploadsEnabled: Boolean(raw.S3_BUCKET && raw.AWS_ACCESS_KEY_ID && raw.AWS_SECRET_ACCESS_KEY),
   clientOrigins: splitList(raw.CLIENT_ORIGIN),
   // compare emails in lower case so "Owner@Gmail.com" still matches
   ownerEmails: splitList(raw.OWNER_EMAILS).map((e) => e.toLowerCase()),
