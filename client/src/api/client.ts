@@ -28,13 +28,15 @@ type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 // Facade over fetch: pages call api.get / api.post and never deal with
 // headers, cookies, JSON parsing or error shapes themselves.
 async function request<T>(method: Method, path: string, body?: unknown): Promise<T> {
+  // files go as multipart form data (the browser sets that header itself), everything else as JSON
+  const isForm = body instanceof FormData;
   let res: Response;
   try {
     res = await fetch(`${config.apiBase}/api${path}`, {
       method,
       credentials: 'include', // send the session cookie
-      headers: body !== undefined ? { 'Content-Type': 'application/json' } : undefined,
-      body: body !== undefined ? JSON.stringify(body) : undefined,
+      headers: body !== undefined && !isForm ? { 'Content-Type': 'application/json' } : undefined,
+      body: body === undefined ? undefined : isForm ? body : JSON.stringify(body),
     });
   } catch {
     throw new NetworkError();
@@ -68,6 +70,7 @@ export const api = {
   delete: <T>(path: string) => request<T>('DELETE', path),
   // DELETE with a JSON body, eg removing a push subscription by its endpoint
   deleteWithBody: <T>(path: string, body: unknown) => request<T>('DELETE', path, body),
+  upload: <T>(path: string, form: FormData) => request<T>('POST', path, form),
 };
 
 // Friendly text for any error a page might catch
