@@ -45,6 +45,20 @@ export class BookingRepository extends BaseRepository<IBooking> {
       .populate('service', 'name durationMin');
   }
 
+  // Grab one booking that is due a reminder and mark it in the same step.
+  // Doing both at once means two job runs can never remind the same booking twice.
+  claimDueReminder(now: Date, until: Date) {
+    return this.model
+      .findOneAndUpdate(
+        { status: 'booked', reminderSent: false, start: { $gt: now, $lte: until } },
+        { $set: { reminderSent: true } },
+        { returnDocument: 'after', sort: { start: 1 } },
+      )
+      .populate('customer', 'name')
+      .populate('barber', 'name')
+      .populate('service', 'name');
+  }
+
   // active bookings for a barber inside a window, used to work out free slots
   findBookedBetween(barberId: string, from: Date, to: Date) {
     return this.model
