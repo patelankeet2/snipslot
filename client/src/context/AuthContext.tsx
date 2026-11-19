@@ -5,6 +5,7 @@ import type { User } from '../types';
 import { AuthContext } from './authContextValue';
 import { API_CACHE, PHOTO_CACHE } from '../offline/cacheNames';
 import { clearOfflineData } from '../offline/bookingCache';
+import { forgetPushOnThisDevice } from '../push/pushClient';
 
 // Only the public profile is remembered (never the token, that lives in an
 // httpOnly cookie) so the app can still open while offline.
@@ -79,6 +80,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = useCallback(async () => {
     try {
+      // stop this device getting the signed out person's notifications (needs the session, so first)
+      await forgetPushOnThisDevice();
       await authApi.logout();
     } finally {
       window.google?.accounts.id.disableAutoSelect();
