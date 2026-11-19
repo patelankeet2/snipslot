@@ -1981,3 +1981,50 @@ svg {
   background: var(--success-50);
   color: var(--success);
 }
+
+/* ==========================================================
+   Notifications card
+   ========================================================== */
+.notify-card {
+  display: grid;
+  gap: 14px;
+}
+
+.notify-card > .btn {
+  justify-self: start;
+}
+
+.notify-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.notify-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.notify-text .muted {
+  margin-top: 2px;
+  font-size: 0.9rem;
+}
+
+.notify-icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--surface-sunk);
+  color: var(--muted);
+  transition:
+    background var(--speed) var(--ease),
+    color var(--speed) var(--ease);
+}
+
+.notify-icon.is-on {
+  background: var(--success-50);
+  color: var(--success);
+}
