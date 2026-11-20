@@ -8,9 +8,9 @@
       "type": "node",
       "request": "launch",
       "cwd": "${workspaceFolder}/server",
-      // tsx lets Node run the TypeScript directly, with source maps for breakpoints
-      "runtimeArgs": ["--import", "tsx"],
-      "program": "${workspaceFolder}/server/src/server.ts",
+      // tsx lets Node run the TypeScript directly. The file is given here rather than as
+      // "program", otherwise VS Code swaps in an old compiled copy from dist/ if one exists.
+      "runtimeArgs": ["--import", "tsx", "src/server.ts"],
       "console": "integratedTerminal",
       "skipFiles": ["<node_internals>/**", "**/node_modules/**"]
     },
