@@ -1,5 +1,7 @@
 # SnipSlot
 
+[![CI](https://github.com/patelankeet2/snipslot/actions/workflows/ci.yml/badge.svg)](https://github.com/patelankeet2/snipslot/actions/workflows/ci.yml)
+
 SnipSlot is a barber and salon booking Progressive Web App for a single shop. Customers sign in with Google, pick a service, a barber and a free time slot, and manage their bookings from their phone, even on a patchy connection. The owner manages services, barbers, opening hours and the daily schedule from the same app and gets a push notification whenever a booking is made or cancelled.
 
 ## Tech stack
@@ -123,3 +125,24 @@ The owner can add a photo to each service and barber. The file goes to `POST /ap
 - returns the URL, which the form then saves on the service or barber
 
 Only URLs from our own bucket are accepted when saving, and the old file is deleted from S3 when a photo is replaced or its service or barber is removed. The bucket blocks public access except for reading the `public/` folder, and the server uses an IAM user that can only put and delete objects in that folder. Without the S3 settings in `.env` the app still works and uploads answer 503.
+
+## Tests
+
+```bash
+cd server && npm test            # unit and API tests, in-memory MongoDB
+cd server && npm run test:coverage
+cd client && npm test            # utilities, offline queue, API client and components
+cd client && npm run test:coverage
+```
+
+- Server tests use `mongodb-memory-server`, so they never touch the real database. Google, the push service and S3 are replaced with fakes in the tests.
+- `tests/unit` covers pure logic (slot calculator, validators, token checks, notification wording, image type checks). `tests/integration` drives the real Express app over HTTP with Supertest.
+- Client tests run in jsdom with Testing Library and an in-memory IndexedDB.
+
+## Debugging
+
+Open the `snipslot` folder in VS Code and use the Run and Debug panel. `.vscode/launch.json` has configurations for the API server, the current server test file, and the client in Edge or Chrome, so breakpoints work in the TypeScript source.
+
+## CI
+
+GitHub Actions (`.github/workflows/ci.yml`) runs lint, type checks, tests with coverage and a production build for both the server and the client on every push and pull request.
