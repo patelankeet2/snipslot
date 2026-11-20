@@ -1,0 +1,43 @@
+{
+  // Debug configurations. Open the snipslot folder in VS Code, then pick one
+  // from the Run and Debug panel (Ctrl+Shift+D) and press F5.
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug API server",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/server",
+      // tsx lets Node run the TypeScript directly, with source maps for breakpoints
+      "runtimeArgs": ["--import", "tsx"],
+      "program": "${workspaceFolder}/server/src/server.ts",
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**", "**/node_modules/**"]
+    },
+    {
+      "name": "Debug current server test file",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/server",
+      "program": "${workspaceFolder}/server/node_modules/vitest/vitest.mjs",
+      "args": ["run", "${relativeFileDirname}/${fileBasename}"],
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**", "**/node_modules/**"]
+    },
+    {
+      "name": "Debug client in Edge",
+      "type": "msedge",
+      "request": "launch",
+      // start the client first with `npm run dev` in the client folder
+      "url": "http://localhost:5173",
+      "webRoot": "${workspaceFolder}/client/src"
+    },
+    {
+      "name": "Debug client in Chrome",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:5173",
+      "webRoot": "${workspaceFolder}/client/src"
+    }
+  ]
+}
