@@ -146,3 +146,18 @@ Open the `snipslot` folder in VS Code and use the Run and Debug panel. `.vscode/
 ## CI
 
 GitHub Actions (`.github/workflows/ci.yml`) runs lint, type checks, tests with coverage and a production build for both the server and the client on every push and pull request.
+
+## Deployment
+
+| Part | Where | Notes |
+| --- | --- | --- |
+| API | Render (free web service, root `server`) | Build `npm ci --include=dev && npm run build`, start `npm start`, health check `/api/health`, auto deploy only after CI passes |
+| Web app | Vercel (root `client`) | `vercel.json` forwards `/api/*` to Render, so the browser only ever talks to one site and the session cookie stays first party |
+| Database | MongoDB Atlas M0 on AWS Sydney | 3 node replica set |
+| Photos | AWS S3 (`public/` readable, IAM user limited to that folder) | |
+| Reminders | GitHub Actions every 10 minutes calls `POST /api/jobs/reminders` | Also keeps the free API awake |
+| Backups | GitHub Actions nightly `mongodump` to a private S3 bucket | Lifecycle rule removes copies after 30 days |
+
+`vercel.json` also sets security headers, including a Content Security Policy that only allows our own scripts, Google Sign-In, Google Fonts and our S3 photos.
+
+To restore a backup: download the archive from S3, then run `mongorestore --uri "<connection string>" --gzip --archive=snipslot-<date>.archive.gz --drop`.
