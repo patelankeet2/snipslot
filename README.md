@@ -151,7 +151,7 @@ GitHub Actions (`.github/workflows/ci.yml`) runs lint, type checks, tests with c
 
 | Part | Where | Notes |
 | --- | --- | --- |
-| API | Render (free web service, root `server`) | Build `npm ci --include=dev && npm run build`, start `npm start`, health check `/api/health`, auto deploy only after CI passes |
+| API | Render (free web service, root `server`, https://snipslot-3s14.onrender.com) | Build `npm ci --include=dev && npm run build`, start `npm start`, health check `/api/health`, auto deploy only after CI passes |
 | Web app | Vercel (root `client`) | `vercel.json` forwards `/api/*` to Render, so the browser only ever talks to one site and the session cookie stays first party |
 | Database | MongoDB Atlas M0 on AWS Sydney | 3 node replica set |
 | Photos | AWS S3 (`public/` readable, IAM user limited to that folder) | |
