@@ -32,10 +32,14 @@ jobs:
       - name: Export the database
         if: steps.check.outputs.ready == 'true'
         run: |
-          # mongodump from the official MongoDB image, so nothing needs installing
-          docker run --rm -v "$PWD:/backup" mongo:8 \
-            mongodump --uri "$MONGODB_URI" --db snipslot --gzip --archive=/backup/snipslot.archive.gz
+          # mongodump from the official MongoDB image, so nothing needs installing.
+          # The archive is streamed to stdout and saved on the runner, because the
+          # container's user is not allowed to write into the runner's folder.
+          docker run --rm mongo:8 \
+            mongodump --uri "$MONGODB_URI" --db snipslot --gzip --archive > snipslot.archive.gz
           ls -lh snipslot.archive.gz
+          # an empty file would mean nothing was exported
+          test -s snipslot.archive.gz
 
       - name: Upload to S3
         if: steps.check.outputs.ready == 'true'
