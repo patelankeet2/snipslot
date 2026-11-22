@@ -11,9 +11,10 @@ import apiRoutes from './routes';
 export function createApp() {
   const app = express();
 
-  // Render puts the app behind a proxy, so trust the first hop.
-  // Needed for secure cookies and for rate limiting by the real client IP.
-  app.set('trust proxy', 1);
+  // Requests reach us through proxies (Vercel, then Render's load balancer).
+  // Trusting exactly that many hops lets req.ip be the real visitor, which the
+  // rate limiter needs; trusting more would let anyone fake their IP.
+  app.set('trust proxy', env.TRUST_PROXY);
 
   app.use(helmet());
   app.use(

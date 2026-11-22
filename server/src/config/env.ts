@@ -16,6 +16,9 @@ const envSchema = z.object({
   GOOGLE_CLIENT_ID: z.string().min(1, 'GOOGLE_CLIENT_ID is required'),
   OWNER_EMAILS: z.string().default(''),
   LOG_LEVEL: z.enum(['error', 'warn', 'info', 'http', 'debug']).default('info'),
+  // how many proxies sit in front of the app: 1 locally / on Render alone,
+  // 2 in production where Vercel forwards /api to Render
+  TRUST_PROXY: z.coerce.number().int().min(0).max(5).default(1),
   // Web Push keys (npx web-push generate-vapid-keys). The private key never leaves the server.
   VAPID_PUBLIC_KEY: z.string().min(1, 'VAPID_PUBLIC_KEY is required'),
   VAPID_PRIVATE_KEY: z.string().min(1, 'VAPID_PRIVATE_KEY is required'),
