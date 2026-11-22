@@ -1,0 +1,45 @@
+name: Nightly database backup
+
+# The free Atlas tier has no automatic backups, so every night we export the
+# whole database with mongodump and keep the file in a private S3 bucket.
+# A lifecycle rule on the bucket deletes copies older than 30 days.
+on:
+  schedule:
+    - cron: '0 14 * * *' # 14:00 UTC is 2 or 3 am in New Zealand
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      MONGODB_URI: ${{ secrets.MONGODB_URI }}
+      BACKUP_BUCKET: ${{ vars.BACKUP_BUCKET }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_BACKUP_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_BACKUP_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ap-southeast-2
+    steps:
+      - name: Check settings
+        id: check
+        run: |
+          if [ -z "$MONGODB_URI" ] || [ -z "$BACKUP_BUCKET" ] || [ -z "$AWS_ACCESS_KEY_ID" ]; then
+            echo "Backup settings are not configured yet, skipping"
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Export the database
+        if: steps.check.outputs.ready == 'true'
+        run: |
+          # mongodump from the official MongoDB image, so nothing needs installing
+          docker run --rm -v "$PWD:/backup" mongo:8 \
+            mongodump --uri "$MONGODB_URI" --db snipslot --gzip --archive=/backup/snipslot.archive.gz
+          ls -lh snipslot.archive.gz
+
+      - name: Upload to S3
+        if: steps.check.outputs.ready == 'true'
+        run: |
+          name="snipslot-$(date -u +%Y-%m-%d-%H%M).archive.gz"
+          aws s3 cp snipslot.archive.gz "s3://$BACKUP_BUCKET/mongo/$name" --only-show-errors
+          echo "Uploaded s3://$BACKUP_BUCKET/mongo/$name"
