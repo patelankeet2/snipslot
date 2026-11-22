@@ -1,0 +1,27 @@
+name: Appointment reminders
+
+# Render's free plan puts the API to sleep when idle, so an in-process timer
+# cannot be trusted. GitHub calls the reminder endpoint instead, which also
+# keeps the API awake during the day.
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Trigger the reminder job
+        env:
+          API_URL: ${{ vars.API_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$API_URL" ] || [ -z "$CRON_SECRET" ]; then
+            echo "API_URL or CRON_SECRET is not set yet, skipping"
+            exit 0
+          fi
+          # the first call may wake the API up, so allow time and retry once
+          curl --fail-with-body --silent --show-error --max-time 90 --retry 1 --retry-delay 20 \
+            -X POST -H "x-cron-secret: $CRON_SECRET" "$API_URL/api/jobs/reminders"
