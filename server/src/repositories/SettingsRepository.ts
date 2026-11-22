@@ -4,7 +4,7 @@ import { ShopSettingsModel, type IOpeningHours, type IShopSettings } from '../mo
 export const DEFAULT_OPENING_HOURS: IOpeningHours[] = [
   { day: 0, open: '09:00', close: '17:00', closed: true },
   { day: 1, open: '09:00', close: '18:00', closed: false },
-  { day: 2, open: '09:00', close: '17:00', closed: false },
+  { day: 2, open: '09:00', close: '18:00', closed: false },
   { day: 3, open: '09:00', close: '18:00', closed: false },
   { day: 4, open: '09:00', close: '18:00', closed: false },
   { day: 5, open: '09:00', close: '18:00', closed: false },
